@@ -385,18 +385,8 @@ bool DisableOptimizations() {
     return true;
   }
 
-  if (clr_optimizations_enabled == "0"_W ||
-      clr_optimizations_enabled == "false"_W) {
-    return false;
-  }
-
-#ifdef _WIN32
-  // default to false on Windows
+  // default to false
   return false;
-#else
-  // default to true on Linux
-  return true;
-#endif
 }
 
 TypeInfo RetrieveTypeForSignature(

@@ -377,11 +377,11 @@ mdMethodSpec DefineMethodSpec(const ComPtr<IMetaDataEmit2>& metadata_emit,
 }
 
 bool DisableOptimizations() {
-  const auto clr_optimizations_enabled =
+  const auto disable_optimizations =
       GetEnvironmentValue(environment::clr_disable_optimizations);
 
-  if (clr_optimizations_enabled == "1"_W ||
-      clr_optimizations_enabled == "true"_W) {
+  if (disable_optimizations == "1"_W ||
+      disable_optimizations == "true"_W) {
     return true;
   }
 

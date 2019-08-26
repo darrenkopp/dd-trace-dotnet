@@ -12,6 +12,7 @@ using Sigil;
 namespace Datadog.Trace.ClrProfiler.Emit
 {
     internal class MethodBuilder<TDelegate>
+        where TDelegate : Delegate
     {
         /// <summary>
         /// Global dictionary for caching reflected delegates

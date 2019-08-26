@@ -366,13 +366,7 @@ namespace Datadog.Trace.ClrProfiler.Emit
                     var explicitType = _explicitParameterTypes[i];
                     var parameterType = _parameters[i]?.GetType();
 
-                    if (parameterType == null)
-                    {
-                        // Nothing to check
-                        continue;
-                    }
-
-                    if (!explicitType.IsAssignableFrom(parameterType))
+                    if (parameterType != null && !explicitType.IsAssignableFrom(parameterType))
                     {
                         throw new ArgumentException($"Parameter Index {i}: Explicit type {explicitType.FullName} is not assignable from {parameterType}");
                     }
@@ -411,15 +405,16 @@ namespace Datadog.Trace.ClrProfiler.Emit
 
                     for (var i = 0; i < typesToCheck.Length; i++)
                     {
-                        if (_namespaceAndNameFilter[i] == ClrNames.Ignore)
-                        {
-                            // Allow for not specifying
-                            continue;
-                        }
+                        string filter = _namespaceAndNameFilter[i];
 
-                        if ($"{typesToCheck[i].Namespace}.{typesToCheck[i].Name}" != _namespaceAndNameFilter[i])
+                        if (filter != ClrNames.Ignore)
                         {
-                            return false;
+                            Type type = typesToCheck[i];
+
+                            if (filter != $"{type.Namespace}.{type.Name}")
+                            {
+                                return false;
+                            }
                         }
                     }
 

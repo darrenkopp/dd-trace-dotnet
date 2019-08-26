@@ -31,8 +31,8 @@ namespace Datadog.Trace.ClrProfiler.Emit
         private Type _concreteType;
         private string _concreteTypeName;
         private object[] _parameters = new object[0];
-        private Type[] _explicitParameterTypes = null;
-        private string[] _namespaceAndNameFilter = null;
+        private Type[] _explicitParameterTypes;
+        private string[] _namespaceAndNameFilter;
         private Type[] _declaringTypeGenerics;
         private Type[] _methodGenerics;
         private bool _forceMethodDefResolve;
@@ -95,12 +95,7 @@ namespace Datadog.Trace.ClrProfiler.Emit
 
         public MethodBuilder<TDelegate> WithParameters(params object[] parameters)
         {
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            _parameters = parameters;
+            _parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
             return this;
         }
 
@@ -136,12 +131,7 @@ namespace Datadog.Trace.ClrProfiler.Emit
 
         public TDelegate Build()
         {
-            var parameterTypesForCache = _explicitParameterTypes;
-
-            if (parameterTypesForCache == null)
-            {
-                parameterTypesForCache = Interception.ParamsToTypes(_parameters);
-            }
+            var parameterTypesForCache = _explicitParameterTypes ?? Interception.ParamsToTypes(_parameters);
 
             var cacheKey = new Key(
                 callingModule: _resolutionModule,
@@ -417,7 +407,8 @@ namespace Datadog.Trace.ClrProfiler.Emit
                         return false;
                     }
 
-                    var typesToCheck = new Type[] { m.ReturnType }.Concat(m.GetParameters().Select(p => p.ParameterType)).ToArray();
+                    var typesToCheck = new[] { m.ReturnType }.Concat(m.GetParameters().Select(p => p.ParameterType)).ToArray();
+
                     for (var i = 0; i < typesToCheck.Length; i++)
                     {
                         if (_namespaceAndNameFilter[i] == ClrNames.Ignore)
@@ -647,9 +638,9 @@ namespace Datadog.Trace.ClrProfiler.Emit
 
                 if (methodGenerics != null)
                 {
-                    for (var i = 0; i < methodGenerics.Length; i++)
+                    foreach (var type in methodGenerics)
                     {
-                        GenericSpec = string.Concat(GenericSpec, $"_{methodGenerics[i]?.FullName ?? "NULL"}_");
+                        GenericSpec = string.Concat(GenericSpec, $"_{type?.FullName ?? "NULL"}_");
                     }
                 }
 
@@ -657,9 +648,9 @@ namespace Datadog.Trace.ClrProfiler.Emit
 
                 if (declaringTypeGenerics != null)
                 {
-                    for (var i = 0; i < declaringTypeGenerics.Length; i++)
+                    foreach (var type in declaringTypeGenerics)
                     {
-                        GenericSpec = string.Concat(GenericSpec, $"_{declaringTypeGenerics[i]?.FullName ?? "NULL"}_");
+                        GenericSpec = string.Concat(GenericSpec, $"_{type?.FullName ?? "NULL"}_");
                     }
                 }
 
